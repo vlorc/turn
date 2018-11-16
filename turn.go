@@ -22,9 +22,11 @@ type Client interface {
 
 // StartArguments are the arguments for the Pion TURN server
 type StartArguments struct {
-	Server  Server
-	Realm   string
-	UDPPort int
+	Server    Server
+	Realm     string
+	UDPPort   int
+	RelayIP   net.IP
+	RelayPort func() int
 }
 
 // ClientArguments are the arguments for the Pion client
@@ -36,7 +38,12 @@ type ClientArguments struct {
 
 // Start the Pion TURN server
 func Start(args StartArguments) {
-	fmt.Println(server.NewServer(args.Realm, args.Server.AuthenticateRequest).Listen("0.0.0.0", args.UDPPort))
+	fmt.Println(server.NewServer(
+		args.Realm,
+		args.Server.AuthenticateRequest,
+		args.RelayIP,
+		args.RelayPort,
+	).Listen("0.0.0.0", args.UDPPort))
 }
 
 // StartClient starts a Pion client

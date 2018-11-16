@@ -2,9 +2,11 @@ package main
 
 import (
 	"log"
+	"net"
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/pions/pkg/stun"
 	"github.com/pions/turn"
@@ -19,6 +21,19 @@ func (m *myTurnServer) AuthenticateRequest(username string, srcAddr *stun.Transp
 		return password, true
 	}
 	return "", false
+}
+
+func makePort(port string) func() int {
+	arr := strings.Split(port, "-")
+	min, _ := strconv.Atoi(arr[0])
+	max, _ := strconv.Atoi(arr[1])
+	count := min
+	return func() int {
+		if count++; count > max {
+			count = min
+		}
+		return count
+	}
 }
 
 func main() {
@@ -45,10 +60,14 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
+	replyIp := os.Getenv("REPLY_IP")
+	replyPort := os.Getenv("REPLY_PORT")
 
 	turn.Start(turn.StartArguments{
-		Server:  m,
-		Realm:   realm,
-		UDPPort: udpPort,
+		Server:    m,
+		Realm:     realm,
+		UDPPort:   udpPort,
+		RelayIP:   net.ParseIP(replyIp),
+		RelayPort: makePort(replyPort),
 	})
 }

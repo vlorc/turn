@@ -27,15 +27,19 @@ type Server struct {
 	packet      []byte
 	realm       string
 	authHandler AuthHandler
+	reply       net.IP
+	port        func() int
 }
 
 // NewServer creates the Pion TURN server
-func NewServer(realm string, a AuthHandler) *Server {
+func NewServer(realm string, a AuthHandler,reply net.IP,port func()int) *Server {
 	const maxStunMessageSize = 1500
 	return &Server{
 		packet:      make([]byte, maxStunMessageSize),
 		realm:       realm,
 		authHandler: a,
+		reply:reply,
+		port: port,
 	}
 }
 

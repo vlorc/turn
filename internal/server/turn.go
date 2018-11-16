@@ -133,7 +133,7 @@ func (s *Server) handleAllocateRequest(srcAddr *stun.TransportAddr, dstAddr *stu
 		DstAddr:  dstAddr,
 		Protocol: allocation.UDP,
 	}
-	requestedPort := 0
+	requestedPort := s.port
 	reservationToken := ""
 
 	// 2. The server checks if the 5-tuple is currently in use by an
@@ -191,7 +191,9 @@ func (s *Server) handleAllocateRequest(srcAddr *stun.TransportAddr, dstAddr *stu
 		if !reservationFound {
 			return respondWithError(errors.Errorf("No reservation found with token %s", reservationTokenAttr.ReservationToken), messageIntegrity, &stun.Err400BadRequest)
 		}
-		requestedPort = allocationPort + 1
+		requestedPort = func() int {
+			return allocationPort + 1
+		}
 	}
 
 	// 6. The server checks if the request contains an EVEN-PORT attribute.
@@ -210,7 +212,9 @@ func (s *Server) handleAllocateRequest(srcAddr *stun.TransportAddr, dstAddr *stu
 		if err != nil {
 			return respondWithError(err, messageIntegrity, &stun.Err508InsufficentCapacity)
 		}
-		requestedPort = randomPort
+		requestedPort = func() int {
+			return randomPort
+		}
 		reservationToken = randSeq(8)
 	}
 
@@ -254,7 +258,7 @@ func (s *Server) handleAllocateRequest(srcAddr *stun.TransportAddr, dstAddr *stu
 	responseAttrs := []stun.Attribute{
 		&stun.XorRelayedAddress{
 			XorAddress: stun.XorAddress{
-				IP:   dstAddr.IP,
+				IP:    s.reply,
 				Port: a.RelayAddr.Port,
 			},
 		},
