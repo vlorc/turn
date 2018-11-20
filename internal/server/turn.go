@@ -235,7 +235,7 @@ func (s *Server) handleAllocateRequest(srcAddr *stun.TransportAddr, dstAddr *stu
 	lifetimeDuration := defaultLifetime
 	if lifetimeRawAttr, ok := m.GetOneAttribute(stun.AttrLifetime); ok {
 		lifetimeAttr := stun.Lifetime{}
-		if err := lifetimeAttr.Unpack(m, lifetimeRawAttr); err == nil {
+		if err := lifetimeAttr.Unpack(m, lifetimeRawAttr); err == nil && lifetimeAttr.Duration > 0{
 			lifetimeDuration = min(lifetimeAttr.Duration, maximumLifetime)
 		}
 	}
@@ -304,7 +304,7 @@ func (s *Server) handleRefreshRequest(srcAddr *stun.TransportAddr, dstAddr *stun
 	lifetimeDuration := defaultLifetime
 	if lifetimeRawAttr, ok := m.GetOneAttribute(stun.AttrLifetime); ok {
 		lifetimeAttr := stun.Lifetime{}
-		if err := lifetimeAttr.Unpack(m, lifetimeRawAttr); err == nil {
+		if err := lifetimeAttr.Unpack(m, lifetimeRawAttr); err == nil && lifetimeAttr.Duration > 0{
 			lifetimeDuration = min(lifetimeAttr.Duration, maximumLifetime)
 		}
 	}
